@@ -1,0 +1,35 @@
+```{r setup, include=FALSE}
+library(data.table)
+library(tidyverse)
+library(haven)
+```
+
+```{r make data from shiny app}
+source(file.path(here::here(), "data-raw", "nhanes_load.R"))
+source(file.path(here::here(), "data-raw", "nhanes_recode.R"))
+source(file.path(here::here(), "data-raw", "nhanes_rename.R"))
+
+nhanes_data <-
+ nhanes_load(as = 'tibble') %>%
+ nhanes_recode() %>%
+ nhanes_rename()
+
+setDT(nhanes_data)
+
+nhanes_key <- cardioStatsUSA::nhanes_key
+
+for(i in intersect(names(nhanes_data), nhanes_key$variable)){
+
+ if(is.null(attr(nhanes_data[[i]], 'label'))){
+  attr(nhanes_data[[i]], 'label') <- nhanes_key %>%
+   .[variable == i] %>%
+   .[['label']]
+ }
+
+}
+```
+
+```{r save dataset}
+saveRDS(nhanes_data, file = "/Users/emmahughes/Library/CloudStorage/GoogleDrive-eah9921@nyu.edu/.shortcut-targets-by-id/1--Zx4PWnpQp3otXrBBjLZuuTrtPXL8I8/NHANES Data/BP Data/BP_NHANES.rds")
+```
+
